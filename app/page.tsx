@@ -14,13 +14,18 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   if (searchParams.id) {
     const ogImageUrl = `/api/og?id=${searchParams.id}`;
-
+    // Fetch the profile to get actual rarity
+    const profile = await getDiscordProfile(searchParams.id);
+    let rarity = "Legendary";
+    if (profile && !("error" in profile) && profile.rarity) {
+      rarity = profile.rarity.charAt(0) + profile.rarity.slice(1).toLowerCase();
+    }
     return {
       title: `Profile #${searchParams.id} - Diskord Legends`,
       description: `Check out this holographic Discord profile card for user ${searchParams.id}. See their rarity, class, and power level!`,
       openGraph: {
-        title: `Legendary Profile Found: #${searchParams.id}`,
-        description: `Check out this holographic Discord profile card. Rarity, Class, and Power Level revealed.`,
+        title: `${rarity} Profile Found: #${searchParams.id}`,
+        description: `Check out this holographic Discord profile card. Rarity: ${rarity}, Class, and Power Level revealed.`,
         images: [
           {
             url: ogImageUrl,
@@ -33,7 +38,7 @@ export async function generateMetadata({
       twitter: {
         card: "summary_large_image",
         title: `Profile #${searchParams.id} - Diskord Legends`,
-        description: `Rarity, Class, and Power Level revealed for user ${searchParams.id}`,
+        description: `Rarity: ${rarity}, Class, and Power Level revealed for user ${searchParams.id}`,
         images: [ogImageUrl],
       },
     };

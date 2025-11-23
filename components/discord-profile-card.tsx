@@ -1,45 +1,75 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useRef } from "react"
-import { motion, useSpring, useTransform, useMotionValue } from "framer-motion"
-import { Check, Download } from "lucide-react"
-import type { DiscordProfile } from "@/app/actions"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
-import { toPng } from "html-to-image"
+import type { DiscordProfile } from "@/app/actions";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { toPng } from "html-to-image";
+import { Check, Download } from "lucide-react";
+import type React from "react";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 
-export type { DiscordProfile as DiscordProfileData }
+export type { DiscordProfile as DiscordProfileData };
 
 interface DiscordProfileCardProps {
-  profile: DiscordProfile
+  profile: DiscordProfile;
 }
 
 const RARITY_COLORS = {
-  COMMON: { main: "#A3A3A3", glow: "rgba(163,163,163,0.5)", bg: "from-gray-900 to-gray-800" },
-  RARE: { main: "#3B82F6", glow: "rgba(59,130,246,0.6)", bg: "from-blue-950 to-slate-900" },
-  EPIC: { main: "#9333EA", glow: "rgba(147,51,234,0.6)", bg: "from-purple-950 to-slate-900" },
-  LEGENDARY: { main: "#EAB308", glow: "rgba(234,179,8,0.7)", bg: "from-yellow-950 to-amber-900" },
-  MYTHIC: { main: "#EF4444", glow: "rgba(239,68,68,0.8)", bg: "from-red-950 to-red-900" },
-}
+  COMMON: {
+    main: "#A3A3A3",
+    glow: "rgba(163,163,163,0.5)",
+    bg: "from-gray-900 to-gray-800",
+  },
+  RARE: {
+    main: "#3B82F6",
+    glow: "rgba(59,130,246,0.6)",
+    bg: "from-blue-950 to-slate-900",
+  },
+  EPIC: {
+    main: "#9333EA",
+    glow: "rgba(147,51,234,0.6)",
+    bg: "from-purple-950 to-slate-900",
+  },
+  LEGENDARY: {
+    main: "#EAB308",
+    glow: "rgba(234,179,8,0.7)",
+    bg: "from-yellow-950 to-amber-900",
+  },
+  MYTHIC: {
+    main: "#EF4444",
+    glow: "rgba(239,68,68,0.8)",
+    bg: "from-red-950 to-red-900",
+  },
+};
 
 const BADGE_ICONS: Record<string, string> = {
   Staff: "https://cdn.discordapp.com/badge-icons/5e74e9b6d94a4d6ed7ea.png",
-  Partner: "https://cdn.discordapp.com/badge-icons/3f9748e53446a137f056295d986dea99.png",
-  "HypeSquad Events": "https://cdn.discordapp.com/badge-icons/bf01d10758569c37a2d7272ece70b9b5.png",
-  "Bug Hunter Level 1": "https://cdn.discordapp.com/badge-icons/2717692c7dca7227c3922800e7d5f1d9.png",
-  "HypeSquad Bravery": "https://cdn.discordapp.com/badge-icons/8a88d638f363a5565e4b.png",
-  "HypeSquad Brilliance": "https://cdn.discordapp.com/badge-icons/01194027dcc0ad9199a8.png",
-  "HypeSquad Balance": "https://cdn.discordapp.com/badge-icons/3aa41de486fa12454c3761e8e223442e.png",
-  "Early Supporter": "https://cdn.discordapp.com/badge-icons/2ba85e8026a8614b640c2837bcdfe21b.png",
-  "Verified Developer": "https://cdn.discordapp.com/badge-icons/6bdc42827a38498929a4920da12695d9.png",
-  "Active Developer": "https://cdn.discordapp.com/badge-icons/6bdc42827a38498929a4920da12695d9.png",
-  "Certified Moderator": "https://cdn.discordapp.com/badge-icons/fee1624003e2fee35cb398e125dc479b.png",
-}
+  Partner:
+    "https://cdn.discordapp.com/badge-icons/3f9748e53446a137f056295d986dea99.png",
+  "HypeSquad Events":
+    "https://cdn.discordapp.com/badge-icons/bf01d10758569c37a2d7272ece70b9b5.png",
+  "Bug Hunter Level 1":
+    "https://cdn.discordapp.com/badge-icons/2717692c7dca7227c3922800e7d5f1d9.png",
+  "HypeSquad Bravery":
+    "https://cdn.discordapp.com/badge-icons/8a88d638f363a5565e4b.png",
+  "HypeSquad Brilliance":
+    "https://cdn.discordapp.com/badge-icons/01194027dcc0ad9199a8.png",
+  "HypeSquad Balance":
+    "https://cdn.discordapp.com/badge-icons/3aa41de486fa12454c3761e8e223442e.png",
+  "Early Supporter":
+    "https://cdn.discordapp.com/badge-icons/2ba85e8026a8614b640c2837bcdfe21b.png",
+  "Verified Developer":
+    "https://cdn.discordapp.com/badge-icons/6bdc42827a38498929a4920da12695d9.png",
+  "Active Developer":
+    "https://cdn.discordapp.com/badge-icons/6bdc42827a38498929a4920da12695d9.png",
+  "Certified Moderator":
+    "https://cdn.discordapp.com/badge-icons/fee1624003e2fee35cb398e125dc479b.png",
+};
 
 const BadgeItem = ({ name }: { name: string }) => {
-  const iconUrl = BADGE_ICONS[name]
+  const iconUrl = BADGE_ICONS[name];
 
   if (iconUrl) {
     return (
@@ -53,7 +83,7 @@ const BadgeItem = ({ name }: { name: string }) => {
           className="w-5 h-5 object-contain opacity-90 group-hover:opacity-100 transition-opacity"
         />
       </div>
-    )
+    );
   }
 
   // Fallback for custom text badges (Veteran, Netizen, etc)
@@ -64,81 +94,85 @@ const BadgeItem = ({ name }: { name: string }) => {
     >
       {name.toUpperCase()}
     </div>
-  )
-}
+  );
+};
 
-export default function DiscordProfileCard({ profile }: DiscordProfileCardProps) {
-  const [copied, setCopied] = useState(false)
-  const [isDownloading, setIsDownloading] = useState(false)
-  const cardRef = useRef<HTMLDivElement>(null)
+export default function DiscordProfileCard({
+  profile,
+}: DiscordProfileCardProps) {
+  const [copied, setCopied] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   // Mouse position for 3D tilt
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
 
-  const mouseXSpring = useSpring(x)
-  const mouseYSpring = useSpring(y)
+  const mouseXSpring = useSpring(x);
+  const mouseYSpring = useSpring(y);
 
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["7deg", "-7deg"])
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-7deg", "7deg"])
-  const brightness = useTransform(mouseYSpring, [-0.5, 0.5], [1.05, 0.95])
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["7deg", "-7deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-7deg", "7deg"]);
+  const brightness = useTransform(mouseYSpring, [-0.5, 0.5], [1.05, 0.95]);
 
-  const rarity = RARITY_COLORS[profile.rarity]
-  const accentColor = profile.accent_color ? `#${profile.accent_color.toString(16).padStart(6, "0")}` : rarity.main
+  const rarity = RARITY_COLORS[profile.rarity];
+  const accentColor = profile.accent_color
+    ? `#${profile.accent_color.toString(16).padStart(6, "0")}`
+    : rarity.main;
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const width = rect.width
-    const height = rect.height
-    const mouseX = e.clientX - rect.left
-    const mouseY = e.clientY - rect.top
-    const xPct = mouseX / width - 0.5
-    const yPct = mouseY / height - 0.5
-    x.set(xPct)
-    y.set(yPct)
-  }
+    const rect = e.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const xPct = mouseX / width - 0.5;
+    const yPct = mouseY / height - 0.5;
+    x.set(xPct);
+    y.set(yPct);
+  };
 
   const handleMouseLeave = () => {
-    x.set(0)
-    y.set(0)
-  }
+    x.set(0);
+    y.set(0);
+  };
 
   const copyProfileLink = () => {
-    navigator.clipboard.writeText(`https://discord.com/users/${profile.id}`)
-    setCopied(true)
-    toast.success("Discord ID copied to clipboard!")
-    setTimeout(() => setCopied(false), 2000)
-  }
+    navigator.clipboard.writeText(`https://discord.com/users/${profile.id}`);
+    setCopied(true);
+    toast.success("Discord ID copied to clipboard!");
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleDownload = async () => {
-    if (!cardRef.current) return
+    if (!cardRef.current) return;
 
-    setIsDownloading(true)
+    setIsDownloading(true);
     try {
       const dataUrl = await toPng(cardRef.current, {
         cacheBust: true,
         pixelRatio: 3, // Higher quality
         backgroundColor: "#111214", // Ensure background is set
-      })
+      });
 
-      const link = document.createElement("a")
-      link.download = `${profile.username}-discord-card.png`
-      link.href = dataUrl
-      link.click()
-      toast.success("Card downloaded successfully!")
+      const link = document.createElement("a");
+      link.download = `${profile.username}-discord-card.png`;
+      link.href = dataUrl;
+      link.click();
+      toast.success("Card downloaded successfully!");
     } catch (err) {
-      console.error(err)
-      toast.error("Failed to generate image.")
+      console.error(err);
+      toast.error("Failed to generate image.");
     } finally {
-      setIsDownloading(false)
+      setIsDownloading(false);
     }
-  }
+  };
 
   const joinDate = new Date(profile.created_at).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
-  })
+  });
 
   return (
     <div className="perspective-1000 w-full max-w-[90vw] sm:max-w-[340px] mx-auto font-sans">
@@ -156,7 +190,10 @@ export default function DiscordProfileCard({ profile }: DiscordProfileCardProps)
         className="relative w-full rounded-[16px] overflow-hidden shadow-2xl transition-all duration-200 ease-out"
       >
         {/* Main Card Container - Discord Dark Theme */}
-        <div ref={cardRef} className="bg-[#111214] h-full flex flex-col relative z-10">
+        <div
+          ref={cardRef}
+          className="bg-[#111214] h-full flex flex-col relative z-10"
+        >
           {/* Banner */}
           <div
             className="h-[120px] w-full relative overflow-hidden"
@@ -209,7 +246,9 @@ export default function DiscordProfileCard({ profile }: DiscordProfileCardProps)
               <h2 className="text-xl font-bold text-white leading-tight break-all">
                 {profile.global_name || profile.username}
               </h2>
-              <p className="text-sm text-[#b5bac1] font-medium break-all">{profile.username}</p>
+              <p className="text-sm text-[#b5bac1] font-medium break-all">
+                {profile.username}
+              </p>
 
               {/* Custom Status */}
               <div className="mt-3 flex items-center gap-2 text-sm text-[#dbdee1]">
@@ -222,14 +261,19 @@ export default function DiscordProfileCard({ profile }: DiscordProfileCardProps)
 
             {/* About Me / Stats Section */}
             <div className="space-y-3">
-              <div className="uppercase text-[11px] font-bold text-[#b5bac1] tracking-wide mb-1">About Me</div>
+              <div className="uppercase text-[11px] font-bold text-[#b5bac1] tracking-wide mb-1">
+                About Me
+              </div>
 
               <div className="grid gap-2">
                 {/* Stat: Class */}
                 <div className="flex items-center gap-3 text-sm text-[#dbdee1]">
                   <div className="w-4 text-center">⚔️</div>
                   <span>
-                    Class: <span className="text-white font-medium">{profile.classType}</span>
+                    Class:{" "}
+                    <span className="text-white font-medium">
+                      {profile.classType}
+                    </span>
                   </span>
                 </div>
 
@@ -248,17 +292,23 @@ export default function DiscordProfileCard({ profile }: DiscordProfileCardProps)
                 <div className="flex items-center gap-3 text-sm text-[#dbdee1]">
                   <div className="w-4 text-center">📅</div>
                   <span>
-                    Member since <span className="text-white font-medium">{joinDate}</span>
+                    Member since{" "}
+                    <span className="text-white font-medium">{joinDate}</span>
                   </span>
                 </div>
               </div>
 
               {/* Roles Section */}
               <div className="mt-4">
-                <div className="uppercase text-[11px] font-bold text-[#b5bac1] tracking-wide mb-2">Roles</div>
+                <div className="uppercase text-[11px] font-bold text-[#b5bac1] tracking-wide mb-2">
+                  Roles
+                </div>
                 <div className="flex flex-wrap gap-1.5">
                   <div className="flex items-center gap-1.5 px-2 py-1 bg-[#2b2d31] rounded-[4px] text-xs font-medium text-[#dbdee1] border border-[#1e1f22]">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: rarity.main }} />
+                    <div
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: rarity.main }}
+                    />
                     {profile.rarity}
                   </div>
                   <div className="flex items-center gap-1.5 px-2 py-1 bg-[#2b2d31] rounded-[4px] text-xs font-medium text-[#dbdee1] border border-[#1e1f22]">
@@ -271,7 +321,9 @@ export default function DiscordProfileCard({ profile }: DiscordProfileCardProps)
 
             {/* Branding Footer */}
             <div className="mt-6 pt-3 border-t border-[#2e3035] flex justify-center">
-              <p className="text-[10px] text-[#5c5e66] font-mono tracking-widest uppercase">Generated by Discord</p>
+              <p className="text-[10px] text-[#5c5e66] font-mono tracking-widest uppercase">
+                Generated by Diskord
+              </p>
             </div>
           </div>
         </div>
@@ -283,7 +335,11 @@ export default function DiscordProfileCard({ profile }: DiscordProfileCardProps)
             background: `linear-gradient(105deg, transparent 40%, rgba(255,255,256,0.4) 45%, rgba(255,255,255,0.2) 50%, transparent 55%)`,
             filter: `brightness(${brightness})`,
             backgroundSize: "200% 200%",
-            backgroundPositionX: useTransform(mouseXSpring, [-0.5, 0.5], ["100%", "0%"]),
+            backgroundPositionX: useTransform(
+              mouseXSpring,
+              [-0.5, 0.5],
+              ["100%", "0%"]
+            ),
           }}
         />
       </motion.div>
@@ -312,5 +368,5 @@ export default function DiscordProfileCard({ profile }: DiscordProfileCardProps)
         </Button>
       </div>
     </div>
-  )
+  );
 }
