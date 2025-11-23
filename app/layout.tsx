@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { IBM_Plex_Mono } from "next/font/google";
 import type React from "react";
@@ -82,6 +83,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${ibmPlexMono.variable} font-mono antialiased`}>
         {children}
+        <Analytics />
       </body>
     </html>
   );
